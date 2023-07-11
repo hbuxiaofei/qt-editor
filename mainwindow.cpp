@@ -36,11 +36,13 @@ MainWindow::MainWindow(Config *config,QWidget *parent)
     setupWindowMenu(); // 窗口菜单功能实现
     setupDebugMenu();  // 调试菜单功能实现
     setupHelpMenu();   // 帮助菜单功能实现
+
     currentChanged(-1);
     currentChanged(0);
+
     setupEditActions();   // 编辑菜单Action设置
     setupDebugActions();  // 调试菜单Action设置
-    setCentralWidget(tabWidget);
+
     restoreGeometry(config->mainWindowsGeometry);
     restoreState(config->mainWindowState);
 }
@@ -61,14 +63,26 @@ void MainWindow::init()
     tabWidget->setTabsClosable(true);
     connect(tabWidget,SIGNAL(currentChanged(int)),this,SLOT(currentChanged(int)));
     connect(tabWidget,SIGNAL(tabCloseRequested(int)),this,SLOT(fileClose(int)));
+    setCentralWidget(tabWidget);
+
     searchDialog = new SearchDialog(config);
     searchDialog->setVisible(false);
 }
 
-void MainWindow::resizeEvent(QResizeEvent *event)
+void MainWindow::saveWindow()
 {
     config->mainWindowsGeometry = saveGeometry();
     config->mainWindowState = saveState();
+}
+
+void MainWindow::resizeEvent(QResizeEvent *event)
+{
+    this->saveWindow();
+}
+
+void MainWindow::moveEvent(QMoveEvent *event)
+{
+    this->saveWindow();
 }
 
 // 判断指定文件是否需要保存 1
@@ -81,7 +95,7 @@ bool MainWindow::maybeSave(int index)
     if (fileName.startsWith(QLatin1String(":/"))) // startsWith判断该文件名是否是以什么开头的
         return true;
     QMessageBox::StandardButton ret;
-    ret = QMessageBox::warning(this, tr("q-editor"),
+    ret = QMessageBox::warning(this, tr("Warning"),
                                tr("The document has been modified.\n"
                                   "Do you want to save your changes?"),
                                QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);//文档已被修改
@@ -102,6 +116,19 @@ void MainWindow::currentChanged(int index)
         } else {
             if (!config->recentFiles.length()) {
                 newFile();
+            } else {
+                QStringListIterator it(config->recentFiles);
+                bool fileExists = false;
+                while (it.hasNext()) {
+                    QString fileName = it.next();
+                    if (QFileInfo(fileName).exists()) {
+                        openFile(fileName);
+                        fileExists = true;
+                    }
+                }
+                if (!fileExists) {
+                    newFile();
+                }
             }
         }
         //updateTextStyleActs(config->fontStyle);
@@ -109,7 +136,7 @@ void MainWindow::currentChanged(int index)
     }
     updateActions();
     setWindowIcon(QIcon(tr(":images/notepad.png")));
-    setWindowTitle(tr("q-editor (%1)").arg(openedFiles.at(index)));
+    setWindowTitle(tr("Q-Text-Editor (%1)").arg(openedFiles.at(index)));
 }
 
 // 文档发生改变
@@ -195,7 +222,7 @@ void MainWindow::closeDuplicate(int index)
     }
     int currIndex = openedFiles.indexOf(fileName); // 获得精准匹配的该位置的索引值
     tabWidget->setCurrentIndex(currIndex);
-    setWindowTitle(tr("q-editor (%1)").arg(fileName));
+    setWindowTitle(tr("Q-Text-Editor (%1)").arg(fileName));
 }
 
 //创建新的Tab（用于打开文件）1
@@ -321,8 +348,8 @@ void MainWindow::newFile()
 {
     QString fileName = tr("New %1").arg(++newNumber);
     openedFiles << fileName;
-    tabWidget->setCurrentIndex(
-                tabWidget->addTab(new NotePad, fileName));
+    tabWidget->setCurrentIndex(tabWidget->addTab(new NotePad, fileName));
+    // EDITOR->document()->setModified(true);
 }
 //文件另存为 1
 bool MainWindow::fileSaveAs(int index)
@@ -354,7 +381,7 @@ bool MainWindow::fileSave(int index)
     if (success) {
         notePad->document()->setModified(false); // setModified不可编辑功能
         tabWidget->setCurrentWidget(notePad);    // 获取当前页面
-        setWindowTitle(tr("q-editor (%1)").arg(fileName));
+        setWindowTitle(tr("Q-Text-Editor (%1)").arg(fileName));
     } else {
         qDebug() << "fileSave error: " << fileName;
     }
@@ -589,14 +616,6 @@ void MainWindow::fillRecentFileActs()
                                                     SLOT(openRecentFile()));
         act->setVisible(false);
         recentFileActs << act;
-    }
-
-    QStringListIterator it(config->recentFiles);
-    while (it.hasNext()) {
-        QString fileName = it.next();
-        if (QFileInfo(fileName).exists()) {
-            openFile(fileName);
-        }
     }
 }
 

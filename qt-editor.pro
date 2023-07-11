@@ -1,4 +1,5 @@
-TARGET = Q-Editor
+TARGET = Q-Text-Editor
+VERSION = 0.1.0.0
 
 QMAKE_TARGET_COPYRIGHT = "Copyright(C) 2023 Ray Lee, All Rights Reserved."
 

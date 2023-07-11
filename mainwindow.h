@@ -28,6 +28,7 @@ public:
 
 protected:
     virtual void resizeEvent(QResizeEvent *event) override;
+    virtual void moveEvent(QMoveEvent *event) override;
 
 signals:
 
@@ -54,6 +55,8 @@ public slots:
     void search();  //查找
     void about();   //关于本软件 1
 private:
+    void saveWindow();
+
     Config *config;//编辑器
     QTabWidget *tabWidget;//Tab栏
     SearchDialog *searchDialog; //查找/替换框
