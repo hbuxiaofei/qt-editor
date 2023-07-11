@@ -119,10 +119,10 @@ void MainWindow::modificationChanged(bool changed)
     if (str[str.length() - 1] == '*') {
         if (!changed)
             str.resize(str.length() - 1);
-    }
-    else if (changed) {
+    } else if (changed) {
         str += '*';
     }
+    qDebug() << ">>> modificationChanged " << str;
     tabWidget->setTabText(tabWidget->currentIndex(), str);
     refreshActions();
     setupEditActions();
@@ -162,8 +162,7 @@ void MainWindow::refreshActions()
 // 更新各Action的状态 1
 void MainWindow::updateActions()
 {
-    connect(EDITOR, SIGNAL(modificationChanged(bool)),
-            SLOT(modificationChanged(bool)), Qt::UniqueConnection);
+    connect(EDITOR, SIGNAL(modificationChanged(bool)), SLOT(modificationChanged(bool)), Qt::UniqueConnection);
 
     refreshActions();
     updateRecentFilesList();
@@ -188,15 +187,13 @@ void MainWindow::closeEvent(QCloseEvent *event)
 void MainWindow::closeDuplicate(int index)
 {
     QString fileName = openedFiles.at(index);
-    for (int i = 0; i < openedFiles.count(); i++)
-    {
-        if (openedFiles.at(i) == fileName && i != index)
-        {
+    for (int i = 0; i < openedFiles.count(); i++) {
+        if (openedFiles.at(i) == fileName && i != index) {
             openedFiles.removeAt(i);
-            tabWidget->removeTab(i);//去掉编号为i的tab
+            tabWidget->removeTab(i); // 去掉编号为i的tab
         }
     }
-    int currIndex = openedFiles.indexOf(fileName);//获得精准匹配的该位置的索引值
+    int currIndex = openedFiles.indexOf(fileName); // 获得精准匹配的该位置的索引值
     tabWidget->setCurrentIndex(currIndex);
     setWindowTitle(tr("q-editor (%1)").arg(fileName));
 }
@@ -240,14 +237,11 @@ void MainWindow::setupFileMenu()
     //文件另存为
     saveAsAct = new QAction(QIcon(tr(":images/filesaveas.png")),
                             tr("Save &As..."), this);
-    saveAsAct->setShortcut(QKeySequence::SaveAs);
     fileMenu->addAction(saveAsAct);
     topToolBar->addAction(saveAsAct);
 
     //保存所有
-    saveAllAct = new QAction(QIcon(tr(":images/saveall.png")), tr("Save All"),
-                             this);
-    saveAllAct->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_S);
+    saveAllAct = new QAction(QIcon(tr(":images/saveall.png")), tr("Save All"), this);
     fileMenu->addAction(saveAllAct);
     topToolBar->addAction(saveAllAct);
 
@@ -290,7 +284,7 @@ void MainWindow::openFile()
 {
     QStringList files;
     files = QFileDialog::getOpenFileNames(this, tr("Open files..."), QString(),
-                                          tr("All Files(*);;Text Files(*.txt)"));
+                                          tr("All Files (*)"));
     QString fileName;
     if (files.count())
     {
@@ -334,11 +328,9 @@ void MainWindow::newFile()
 bool MainWindow::fileSaveAs(int index)
 {
     QString fn = QFileDialog::getSaveFileName(this, tr("Save as..."), QString(),
-                                              tr("Plain text Files(*.txt);;All Files (*)"));
+                                              tr("All Files (*)"));
     if (fn.isEmpty())
         return false;
-    if (!fn.endsWith(".txt", Qt::CaseInsensitive))
-        fn += ".txt";
 
     openedFiles.replace(index, fn);//替换函数
     tabWidget->setTabText(index, QFileInfo(fn).fileName());
@@ -356,13 +348,15 @@ bool MainWindow::fileSave(int index)
 
     // 若要编写文档，请使用文件名或设备对象构造 QTextDocumentWriter 对象
     QTextDocumentWriter writer(fileName);
+    writer.setFormat("plaintext");
     // 将给定的文档写入分配的设备或文件，如果成功，则返回1;否则返回0.
     bool success = writer.write(notePad->document());
-
     if (success) {
         notePad->document()->setModified(false); // setModified不可编辑功能
         tabWidget->setCurrentWidget(notePad);    // 获取当前页面
         setWindowTitle(tr("q-editor (%1)").arg(fileName));
+    } else {
+        qDebug() << "fileSave error: " << fileName;
     }
 
     closeDuplicate(index);
