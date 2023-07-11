@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>SynatxHight/C.txt</file>
+    </qresource>
+</RCC>
