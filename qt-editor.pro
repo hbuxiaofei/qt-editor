@@ -1,3 +1,9 @@
+TARGET = Q-Editor
+
+QMAKE_TARGET_COPYRIGHT = "Copyright(C) 2023 Ray Lee, All Rights Reserved."
+
+RC_ICONS = images/notepad.ico
+
 QT += gui core printsupport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets

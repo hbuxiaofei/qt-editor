@@ -37,5 +37,6 @@
         <file>images/zoomout.png</file>
         <file>images/debug.png</file>
         <file>images/run.png</file>
+        <file>images/notepad.ico</file>
     </qresource>
 </RCC>
