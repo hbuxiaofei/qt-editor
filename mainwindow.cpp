@@ -52,6 +52,7 @@ void MainWindow::init()
 {
     menuBar = new QMenuBar(this);    // 菜单栏
     topToolBar = new QToolBar(this); // 第一个工具栏
+    topToolBar->setObjectName("topToolBar");
     topToolBar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
     setMenuBar(menuBar);
     addToolBar(topToolBar);
@@ -83,6 +84,17 @@ void MainWindow::resizeEvent(QResizeEvent *event)
 void MainWindow::moveEvent(QMoveEvent *event)
 {
     this->saveWindow();
+}
+
+void MainWindow::changeEvent(QEvent *event)
+{
+    switch (event->type()) {
+    case QEvent::WindowStateChange:
+        this->saveWindow();
+        break;
+    default:
+        break;
+    }
 }
 
 // 判断指定文件是否需要保存 1

@@ -29,6 +29,7 @@ public:
 protected:
     virtual void resizeEvent(QResizeEvent *event) override;
     virtual void moveEvent(QMoveEvent *event) override;
+    virtual void changeEvent(QEvent *event) override;
 
 signals:
 
